@@ -33,12 +33,10 @@ export default {
     },
     plugins: [
       'expo-router',
-      'expo-font',
-      'expo-web-browser'
+      'expo-font'
     ],
     experiments: {
       typedRoutes: true
-    },
-    newArchEnabled: true
+    }
   }
 };
