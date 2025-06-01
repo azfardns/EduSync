@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { useColorScheme } from 'react-native';
-import { Home, GraduationCap, ChartBar } from 'lucide-react-native';
+import { Chrome as Home, GraduationCap, ChartBar } from 'lucide-react-native';
 import { CoursesProvider } from '@/hooks/useCourses';
 
 export default function TabLayout() {
