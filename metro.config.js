@@ -10,8 +10,6 @@ module.exports = {
       ...defaultConfig.resolver.extraNodeModules,
       'events': require.resolve('events'),
       'stream': require.resolve('stream-browserify'),
-      'net': require.resolve('react-native-tcp'),
-      'tls': require.resolve('react-native-tcp'),
     },
   },
 };

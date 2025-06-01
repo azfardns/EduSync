@@ -43,7 +43,10 @@ export default function InsightsScreen() {
           <Text style={[styles.sectionTitle, isDark && styles.textDark]}>
             Performance Trends
           </Text>
-          <View style={styles.chartPlaceholder}>
+          <View style={[
+            styles.chartPlaceholder,
+            { backgroundColor: isDark ? '#333333' : '#F8F9FA' }
+          ]}>
             <BarChart2 size={48} color={isDark ? '#BBBBBB' : '#666666'} />
             <Text style={[styles.placeholderText, isDark && styles.textLightDark]}>
               Performance data visualization coming soon
@@ -110,7 +113,6 @@ const styles = StyleSheet.create({
     height: 200,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: isDark ? '#333333' : '#F8F9FA',
     borderRadius: 12,
     padding: 20,
   },
