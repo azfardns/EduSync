@@ -1,7 +1,6 @@
 import { Tabs } from 'expo-router';
 import { useColorScheme } from 'react-native';
-import { Chrome as Home, QrCode, ChartBar as BarChart2, User } from 'lucide-react-native';
-import { useAuth } from '@/hooks/useAuth';
+import { Home, GraduationCap, ChartBar } from 'lucide-react-native';
 import { CoursesProvider } from '@/hooks/useCourses';
 
 export default function TabLayout() {
@@ -26,29 +25,22 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Home',
+            title: 'Home Hub',
             tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
           }}
         />
         <Tabs.Screen
-          name="attendance"
+          name="classroom"
           options={{
             title: 'Classroom',
-            tabBarIcon: ({ color, size }) => <QrCode size={size} color={color} />,
+            tabBarIcon: ({ color, size }) => <GraduationCap size={size} color={color} />,
           }}
         />
         <Tabs.Screen
           name="insights"
           options={{
             title: 'Insights',
-            tabBarIcon: ({ color, size }) => <BarChart2 size={size} color={color} />,
-          }}
-        />
-        <Tabs.Screen
-          name="profile"
-          options={{
-            title: 'Settings',
-            tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
+            tabBarIcon: ({ color, size }) => <ChartBar size={size} color={color} />,
           }}
         />
       </Tabs>
