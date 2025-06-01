@@ -11,7 +11,7 @@ export default {
       image: './assets/images/icon.png',
       resizeMode: 'contain',
       backgroundColor: '#ffffff'
-    }
+    },
     assetBundlePatterns: [
       '**/*'
     ],
