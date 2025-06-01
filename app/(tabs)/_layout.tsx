@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { useColorScheme } from 'react-native';
-import { Chrome as Home, GraduationCap, BarChart2, Settings } from 'lucide-react-native';
+import { Chrome as Home, GraduationCap, ChartBar as BarChart2, Settings } from 'lucide-react-native';
 import { AuthProvider } from '@/hooks/useAuth';
 import { CoursesProvider } from '@/hooks/useCourses';
 import { CourseworkProvider } from '@/hooks/useCoursework';
