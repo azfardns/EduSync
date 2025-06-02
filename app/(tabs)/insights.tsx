@@ -10,10 +10,6 @@ export default function InsightsScreen() {
 
   return (
     <SafeAreaView style={[styles.container, isDark && styles.containerDark]} edges={['top']}>
-      <View style={[styles.header, isDark && styles.headerDark]}>
-        <Text style={[styles.headerTitle, isDark && styles.textDark]}>Analytics</Text>
-      </View>
-
       <ScrollView style={styles.content}>
         <View style={styles.statsContainer}>
           <DashboardStat
@@ -61,27 +57,9 @@ const styles = StyleSheet.create({
   containerDark: {
     backgroundColor: '#121212',
   },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 24,
-  },
-  headerDark: {
-    backgroundColor: '#121212',
-  },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#333333',
-  },
-  textDark: {
-    color: '#FFFFFF',
-  },
-  textLightDark: {
-    color: '#BBBBBB',
-  },
   content: {
     flex: 1,
+    paddingTop: 20,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -124,5 +102,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666666',
     textAlign: 'center',
+  },
+  textDark: {
+    color: '#FFFFFF',
+  },
+  textLightDark: {
+    color: '#BBBBBB',
   },
 });
