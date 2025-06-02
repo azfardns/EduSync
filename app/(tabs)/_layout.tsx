@@ -15,50 +15,45 @@ export default function TabLayout() {
           tabBarInactiveTintColor: isDark ? '#666666' : '#BBBBBB',
           tabBarStyle: {
             backgroundColor: isDark ? '#1A1A1A' : '#FFFFFF',
-            borderTopWidth: 0,
-            position: 'absolute',
-            bottom: 20,
-            left: 20,
-            right: 20,
-            height: 70,
-            borderRadius: 35,
+            borderTopWidth: 1,
+            borderTopColor: isDark ? '#2A2A2A' : '#E0E0E0',
+            height: 60,
+            paddingBottom: 5,
             shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
+            shadowOffset: { width: 0, height: -2 },
             shadowOpacity: 0.1,
-            shadowRadius: 8,
+            shadowRadius: 4,
             elevation: 4,
-            paddingBottom: 0,
-            paddingHorizontal: 10,
           },
           tabBarItemStyle: {
-            paddingVertical: 8,
+            paddingVertical: 5,
           },
           tabBarLabelStyle: {
             fontSize: 12,
             fontWeight: '600',
-            marginTop: 4,
+            marginTop: 2,
           },
-          headerShown: false, // Remove header for all tabs
+          headerShown: false,
         }}>
         <Tabs.Screen
           name="index"
           options={{
             title: 'Home Hub',
-            tabBarIcon: ({ color, size }) => <Home size={28} color={color} />,
+            tabBarIcon: ({ color, size }) => <Home size={24} color={color} />,
           }}
         />
         <Tabs.Screen
           name="classroom"
           options={{
             title: 'Classroom',
-            tabBarIcon: ({ color, size }) => <GraduationCap size={28} color={color} />,
+            tabBarIcon: ({ color, size }) => <GraduationCap size={24} color={color} />,
           }}
         />
         <Tabs.Screen
           name="insights"
           options={{
             title: 'Insights',
-            tabBarIcon: ({ color, size }) => <ChartBar size={28} color={color} />,
+            tabBarIcon: ({ color, size }) => <ChartBar size={24} color={color} />,
           }}
         />
       </Tabs>
