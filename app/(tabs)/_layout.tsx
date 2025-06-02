@@ -6,41 +6,59 @@ import { CoursesProvider } from '@/hooks/useCourses';
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-  
+
   return (
     <CoursesProvider>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: '#4361EE',
-          tabBarInactiveTintColor: isDark ? '#CCCCCC' : '#888888',
+          tabBarActiveTintColor: isDark ? '#FF6F61' : '#4361EE',
+          tabBarInactiveTintColor: isDark ? '#666666' : '#BBBBBB',
           tabBarStyle: {
             backgroundColor: isDark ? '#1A1A1A' : '#FFFFFF',
-            borderTopColor: isDark ? '#333333' : '#EEEEEE',
+            borderTopWidth: 0,
+            position: 'absolute',
+            bottom: 20,
+            left: 20,
+            right: 20,
+            height: 70,
+            borderRadius: 35,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+            elevation: 4,
+            paddingBottom: 0,
+            paddingHorizontal: 10,
           },
-          headerStyle: {
-            backgroundColor: isDark ? '#1A1A1A' : '#FFFFFF',
+          tabBarItemStyle: {
+            paddingVertical: 8,
           },
-          headerTintColor: isDark ? 'white' : '#333',
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: '600',
+            marginTop: 4,
+          },
+          headerShown: false, // Remove header for all tabs
         }}>
         <Tabs.Screen
           name="index"
           options={{
             title: 'Home Hub',
-            tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
+            tabBarIcon: ({ color, size }) => <Home size={28} color={color} />,
           }}
         />
         <Tabs.Screen
           name="classroom"
           options={{
             title: 'Classroom',
-            tabBarIcon: ({ color, size }) => <GraduationCap size={size} color={color} />,
+            tabBarIcon: ({ color, size }) => <GraduationCap size={28} color={color} />,
           }}
         />
         <Tabs.Screen
           name="insights"
           options={{
             title: 'Insights',
-            tabBarIcon: ({ color, size }) => <ChartBar size={size} color={color} />,
+            tabBarIcon: ({ color, size }) => <ChartBar size={28} color={color} />,
           }}
         />
       </Tabs>
