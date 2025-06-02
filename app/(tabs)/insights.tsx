@@ -10,44 +10,39 @@ export default function InsightsScreen() {
 
   return (
     <SafeAreaView style={[styles.container, isDark && styles.containerDark]} edges={['top']}>
-      <View style={styles.header}>
+      <View style={[styles.header, isDark && styles.headerDark]}>
         <Text style={[styles.headerTitle, isDark && styles.textDark]}>Analytics</Text>
       </View>
 
       <ScrollView style={styles.content}>
         <View style={styles.statsContainer}>
           <DashboardStat
-            icon={<TrendingUp size={24} color={isDark ? '#4361EE' : '#4361EE'} />}
+            icon={<TrendingUp size={24} color="#4361EE" />}
             label="Performance"
             value="85%"
             backgroundColor={isDark ? '#2A2A2A' : '#E7ECFF'}
             isDark={isDark}
           />
           <DashboardStat
-            icon={<Users size={24} color={isDark ? '#4CAF50' : '#4CAF50'} />}
+            icon={<Users size={24} color="#4CAF50" />}
             label="Engagement"
             value="92%"
             backgroundColor={isDark ? '#2A2A2A' : '#E6F7ED'}
             isDark={isDark}
           />
           <DashboardStat
-            icon={<Clock size={24} color={isDark ? '#FF9F1C' : '#FF9F1C'} />}
+            icon={<Clock size={24} color="#FF6F61" />}
             label="Time Spent"
             value="4.2h"
-            backgroundColor={isDark ? '#2A2A2A' : '#FFF8E1'}
+            backgroundColor={isDark ? '#2A2A2A' : '#F8EDEB'}
             isDark={isDark}
           />
         </View>
 
         <View style={[styles.section, isDark && styles.sectionDark]}>
-          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>
-            Performance Trends
-          </Text>
-          <View style={[
-            styles.chartPlaceholder,
-            { backgroundColor: isDark ? '#333333' : '#F8F9FA' }
-          ]}>
-            <BarChart2 size={48} color={isDark ? '#BBBBBB' : '#666666'} />
+          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Performance Trends</Text>
+          <View style={[styles.chartPlaceholder, isDark && styles.chartPlaceholderDark]}>
+            <BarChart2 size={48} color={isDark ? '#FFFFFF' : '#666666'} />
             <Text style={[styles.placeholderText, isDark && styles.textLightDark]}>
               Performance data visualization coming soon
             </Text>
@@ -61,50 +56,48 @@ export default function InsightsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#F9F9F9',
   },
   containerDark: {
     backgroundColor: '#121212',
   },
   header: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 16,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 24,
+  },
+  headerDark: {
+    backgroundColor: '#121212',
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 32,
+    fontWeight: '800',
     color: '#333333',
   },
   textDark: {
     color: '#FFFFFF',
   },
   textLightDark: {
-    color: '#CCCCCC',
+    color: '#BBBBBB',
   },
   content: {
     flex: 1,
   },
   statsContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 12,
+    paddingHorizontal: 20,
     marginBottom: 24,
+    justifyContent: 'space-between',
   },
   section: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
     padding: 20,
-    marginHorizontal: 16,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: '#EEEEEE',
+    backgroundColor: '#F9F9F9',
   },
   sectionDark: {
-    backgroundColor: '#2A2A2A',
-    borderColor: '#3A3A3A',
+    backgroundColor: '#121212',
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
     color: '#333333',
     marginBottom: 20,
@@ -113,8 +106,18 @@ const styles = StyleSheet.create({
     height: 200,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 20,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  chartPlaceholderDark: {
+    backgroundColor: '#2A2A2A',
+    shadowColor: '#FFFFFF',
   },
   placeholderText: {
     marginTop: 12,
