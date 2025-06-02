@@ -46,7 +46,7 @@ export default function LoginScreen() {
               source={{ uri: 'https://images.pexels.com/photos/256490/pexels-photo-256490.jpeg?auto=compress&cs=tinysrgb&w=800' }}
               style={styles.logo}
             />
-            <Text style={[styles.title, isDark && styles.textDark]}>DiplomaTrack</Text>
+            <Text style={[styles.title, isDark && styles.textDark]}>Edusync</Text>
             <Text style={[styles.subtitle, isDark && styles.textLightDark]}>
               Manage coursework, attendance, and assessments
             </Text>
