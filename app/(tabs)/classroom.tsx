@@ -116,7 +116,7 @@ export default function ClassroomScreen() {
             )}
           </View>
         ) : (
-          <CourseworkList />
+          <CourseworkList location="classroom" />
         )}
       </ScrollView>
 
@@ -204,14 +204,14 @@ const styles = StyleSheet.create({
   tabText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#666666', // Darker color for better visibility
+    color: '#666666',
   },
   activeTabText: {
-    color: '#333333', // Even darker for active tab
+    color: '#333333',
     fontWeight: '700',
   },
   textDark: {
-    color: '#BBBBBB', // Lighter gray for dark mode, ensuring contrast
+    color: '#BBBBBB',
   },
   textLightDark: {
     color: '#888888',
