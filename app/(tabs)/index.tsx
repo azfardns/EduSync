@@ -31,11 +31,19 @@ export default function HomeScreen() {
 
   const renderInstructorDashboard = () => (
     <>
-      <View style={[styles.header, isDark && styles.headerDark]}>
-        <Text style={[styles.headerTitle, isDark && styles.textDark]}>Dashboard</Text>
-      </View>
-
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={[styles.actionContainer, isDark && styles.actionContainerDark]}>
+          {isInstructor && (
+            <TouchableOpacity
+              style={[styles.addButton, isDark && styles.addButtonDark]}
+              onPress={() => setShowAddModal(true)}
+              activeOpacity={0.8}
+            >
+              <Plus size={20} color={isDark ? '#FFFFFF' : '#FF6F61'} />
+            </TouchableOpacity>
+          )}
+        </View>
+
         <View style={styles.statsContainer}>
           <DashboardStat
             icon={<Users size={24} color="#FF6F61" />}
@@ -77,10 +85,6 @@ export default function HomeScreen() {
 
   const renderStudentDashboard = () => (
     <>
-      <View style={[styles.header, isDark && styles.headerDark]}>
-        <Text style={[styles.headerTitle, isDark && styles.textDark]}>Home</Text>
-      </View>
-
       <ScrollView style={styles.content}>
         <View style={styles.welcomeContainer}>
           <Text style={[styles.welcomeText, isDark && styles.textDark]}>
@@ -111,28 +115,15 @@ const styles = StyleSheet.create({
   containerDark: {
     backgroundColor: '#121212',
   },
-  header: {
+  actionContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    justifyContent: 'flex-end',
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 24,
   },
-  headerDark: {
+  actionContainerDark: {
     backgroundColor: '#121212',
-  },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#333333',
-    fontFamily: 'System',
-  },
-  textDark: {
-    color: '#FFFFFF',
-  },
-  textLightDark: {
-    color: '#BBBBBB',
   },
   addButton: {
     width: 48,
@@ -175,6 +166,7 @@ const styles = StyleSheet.create({
   },
   welcomeContainer: {
     paddingHorizontal: 20,
+    paddingTop: 20,
     marginBottom: 24,
   },
   welcomeText: {
@@ -187,5 +179,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666666',
     fontWeight: '500',
+  },
+  textDark: {
+    color: '#FFFFFF',
+  },
+  textLightDark: {
+    color: '#BBBBBB',
   },
 });
