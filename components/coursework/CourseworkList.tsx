@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, useColorScheme } from 'react-native';
 import { useCoursework } from '@/hooks/useCoursework';
 import { useCourses } from '@/hooks/useCourses';
-import CourseworkItem from './CourseworkItem';
+import CourseworkItem from './CourseworkItem'; // Confirming the import path
 
 export default function CourseworkList({ location = 'home' }) {
   const { courseworks, isLoading } = useCoursework();
