@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Modal, useColorScheme } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Modal, useColorScheme, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/hooks/useAuth';
 import { LogOut, Mail, Key, Calendar, BookOpen, GraduationCap, Users, Award } from 'lucide-react-native';
@@ -34,17 +34,22 @@ export default function ProfileScreen() {
   
   return (
     <SafeAreaView style={[styles.container, isDark && styles.containerDark]} edges={['top']}>
-      <View style={styles.content}>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        bounces={true}
+      >
         {/* Profile Card */}
         <View style={[styles.profileCard, isDark && styles.profileCardDark]}>
           <Image
             source={{ uri: 'https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' }}
             style={styles.profileImage}
           />
-          <Text style={[styles.name, isDark && styles.textDark]}>{user?.name}</Text>
+          <Text style={[styles.name, isDark && styles.textDark]}>{String(user?.name || '')}</Text>
           <View style={[styles.roleBadge, { backgroundColor: badgeColors.bg }]}>
             <Text style={[styles.roleText, { color: badgeColors.text }]}>
-              {user?.role.charAt(0).toUpperCase() + user?.role.slice(1)}
+              {String(user?.role || '').charAt(0).toUpperCase() + String(user?.role || '').slice(1)}
             </Text>
           </View>
         </View>
@@ -57,7 +62,7 @@ export default function ProfileScreen() {
             <Mail size={20} color={isDark ? '#BBBBBB' : '#666666'} />
             <View style={styles.detailContent}>
               <Text style={[styles.detailLabel, isDark && styles.textLightDark]}>Email</Text>
-              <Text style={[styles.detailValue, isDark && styles.textDark]}>{user?.email}</Text>
+              <Text style={[styles.detailValue, isDark && styles.textDark]}>{String(user?.email || '')}</Text>
             </View>
           </View>
           
@@ -65,7 +70,7 @@ export default function ProfileScreen() {
             <Key size={20} color={isDark ? '#BBBBBB' : '#666666'} />
             <View style={styles.detailContent}>
               <Text style={[styles.detailLabel, isDark && styles.textLightDark]}>User ID</Text>
-              <Text style={[styles.detailValue, isDark && styles.textDark]}>{user?.id}</Text>
+              <Text style={[styles.detailValue, isDark && styles.textDark]}>{String(user?.id || '')}</Text>
             </View>
           </View>
           
@@ -74,7 +79,7 @@ export default function ProfileScreen() {
             <View style={styles.detailContent}>
               <Text style={[styles.detailLabel, isDark && styles.textLightDark]}>Account Created</Text>
               <Text style={[styles.detailValue, isDark && styles.textDark]}>
-                {new Date().toLocaleDateString()}
+                {String(new Date().toLocaleDateString())}
               </Text>
             </View>
           </View>
@@ -135,40 +140,40 @@ export default function ProfileScreen() {
           <LogOut size={20} color="#FF6B6B" />
           <Text style={styles.logoutButtonText}>Log Out</Text>
         </TouchableOpacity>
+      </ScrollView>
 
-        {/* Logout Confirmation Modal */}
-        <Modal
-          visible={showLogoutModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowLogoutModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={[styles.modalContent, isDark && styles.modalContentDark]}>
-              <Text style={[styles.modalTitle, isDark && styles.textDark]}>Log Out</Text>
-              <Text style={[styles.modalMessage, isDark && styles.textLightDark]}>
-                Are you sure you want to log out?
-              </Text>
+      {/* Logout Confirmation Modal */}
+      <Modal
+        visible={showLogoutModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowLogoutModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, isDark && styles.modalContentDark]}>
+            <Text style={[styles.modalTitle, isDark && styles.textDark]}>Log Out</Text>
+            <Text style={[styles.modalMessage, isDark && styles.textLightDark]}>
+              Are you sure you want to log out?
+            </Text>
+            
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton, isDark && styles.cancelButtonDark]}
+                onPress={() => setShowLogoutModal(false)}
+              >
+                <Text style={[styles.cancelButtonText, isDark && styles.textLightDark]}>Cancel</Text>
+              </TouchableOpacity>
               
-              <View style={styles.modalButtons}>
-                <TouchableOpacity
-                  style={[styles.modalButton, styles.cancelButton, isDark && styles.cancelButtonDark]}
-                  onPress={() => setShowLogoutModal(false)}
-                >
-                  <Text style={[styles.cancelButtonText, isDark && styles.textLightDark]}>Cancel</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={[styles.modalButton, styles.confirmButton]}
-                  onPress={handleLogout}
-                >
-                  <Text style={styles.confirmButtonText}>Log Out</Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.confirmButton]}
+                onPress={handleLogout}
+              >
+                <Text style={styles.confirmButtonText}>Log Out</Text>
+              </TouchableOpacity>
             </View>
           </View>
-        </Modal>
-      </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -181,9 +186,12 @@ const styles = StyleSheet.create({
   containerDark: {
     backgroundColor: '#121212',
   },
-  content: {
+  scrollView: {
     flex: 1,
+  },
+  scrollContent: {
     padding: 20,
+    paddingBottom: 40,
   },
   profileCard: {
     backgroundColor: '#FFFFFF',
@@ -320,7 +328,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFEBEB',
     padding: 16,
     borderRadius: 12,
-    marginTop: 'auto',
+    marginTop: 20,
   },
   logoutButtonDark: {
     backgroundColor: '#3A2828',
