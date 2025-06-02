@@ -32,6 +32,17 @@ export default function HomeScreen() {
   const renderInstructorDashboard = () => (
     <>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={[styles.actionContainer, isDark && styles.actionContainerDark]}>
+          {isInstructor && (
+            <TouchableOpacity
+              style={[styles.addButton, isDark && styles.addButtonDark]}
+              onPress={() => setShowAddModal(true)}
+              activeOpacity={0.8}
+            >
+              <Plus size={20} color={isDark ? '#FFFFFF' : '#FF6F61'} />
+            </TouchableOpacity>
+          )}
+        </View>
 
         <View style={styles.statsContainer}>
           <DashboardStat
