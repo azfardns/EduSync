@@ -70,7 +70,7 @@ export default function HomeScreen() {
 
         <View style={[styles.section, isDark && styles.sectionDark]}>
           <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Recent Coursework</Text>
-          <CourseworkList />
+          <CourseworkList location="home" />
         </View>
       </ScrollView>
 
@@ -95,7 +95,7 @@ export default function HomeScreen() {
           </Text>
         </View>
 
-        <CourseworkList />
+        <CourseworkList location="home" />
       </ScrollView>
     </>
   );
@@ -183,7 +183,4 @@ const styles = StyleSheet.create({
   textDark: {
     color: '#FFFFFF',
   },
-  textLightDark: {
-    color: '#BBBBBB',
-  },
-});
+  textLight
