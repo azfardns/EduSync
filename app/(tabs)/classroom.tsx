@@ -30,32 +30,28 @@ export default function ClassroomScreen() {
 
   return (
     <SafeAreaView style={[styles.container, isDark && styles.containerDark]} edges={['top']}>
-      <View style={styles.header}>
+      <View style={[styles.header, isDark && styles.headerDark]}>
         <Text style={[styles.headerTitle, isDark && styles.textDark]}>Classroom</Text>
         {isInstructor && (
           <TouchableOpacity
             style={[styles.addButton, isDark && styles.addButtonDark]}
             onPress={() => setShowAddModal(true)}
+            activeOpacity={0.8}
           >
-            <Plus size={20} color={isDark ? '#FFFFFF' : '#333333'} />
-            <Text style={[styles.addButtonText, isDark && styles.textDark]}>Add New</Text>
+            <Plus size={20} color={isDark ? '#FFFFFF' : '#FF6F61'} />
           </TouchableOpacity>
         )}
       </View>
 
       <View style={[styles.tabBar, isDark && styles.tabBarDark]}>
         <TouchableOpacity
-          style={[
-            styles.tab,
-            activeTab === 'attendance' && styles.activeTab,
-            isDark && styles.tabDark,
-            activeTab === 'attendance' && isDark && styles.activeTabDark,
-          ]}
+          style={[styles.tab, activeTab === 'attendance' && styles.activeTab]}
           onPress={() => setActiveTab('attendance')}
+          activeOpacity={0.8}
         >
           <QrCode
             size={20}
-            color={activeTab === 'attendance' ? '#4361EE' : isDark ? '#BBBBBB' : '#666666'}
+            color={activeTab === 'attendance' ? '#FF6F61' : isDark ? '#BBBBBB' : '#666666'}
           />
           <Text
             style={[
@@ -69,13 +65,9 @@ export default function ClassroomScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[
-            styles.tab,
-            activeTab === 'coursework' && styles.activeTab,
-            isDark && styles.tabDark,
-            activeTab === 'coursework' && isDark && styles.activeTabDark,
-          ]}
+          style={[styles.tab, activeTab === 'coursework' && styles.activeTab]}
           onPress={() => setActiveTab('coursework')}
+          activeOpacity={0.8}
         >
           <BookOpen
             size={20}
@@ -98,27 +90,27 @@ export default function ClassroomScreen() {
           <View style={[styles.attendanceContainer, isDark && styles.attendanceContainerDark]}>
             {isInstructor ? (
               <>
-                <QrCode size={64} color={isDark ? '#BBBBBB' : '#666666'} />
+                <QrCode size={48} color={isDark ? '#FFFFFF' : '#FF6F61'} />
                 <Text style={[styles.attendanceTitle, isDark && styles.textDark]}>
                   Start Attendance Session
                 </Text>
                 <Text style={[styles.attendanceSubtitle, isDark && styles.textLightDark]}>
                   Generate a QR code for students to scan
                 </Text>
-                <TouchableOpacity style={styles.generateButton}>
+                <TouchableOpacity style={[styles.generateButton, isDark && styles.generateButtonDark]} activeOpacity={0.8}>
                   <Text style={styles.generateButtonText}>Generate QR Code</Text>
                 </TouchableOpacity>
               </>
             ) : (
               <>
-                <QrCode size={64} color={isDark ? '#BBBBBB' : '#666666'} />
+                <QrCode size={48} color={isDark ? '#FFFFFF' : '#FF6F61'} />
                 <Text style={[styles.attendanceTitle, isDark && styles.textDark]}>
                   Scan Attendance QR Code
                 </Text>
                 <Text style={[styles.attendanceSubtitle, isDark && styles.textLightDark]}>
                   Point your camera at the QR code displayed by your instructor
                 </Text>
-                <TouchableOpacity style={styles.scanButton}>
+                <TouchableOpacity style={[styles.scanButton, isDark && styles.scanButtonDark]} activeOpacity={0.8}>
                   <Text style={styles.scanButtonText}>Start Scanning</Text>
                 </TouchableOpacity>
               </>
@@ -144,7 +136,7 @@ export default function ClassroomScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#F9F9F9',
   },
   containerDark: {
     backgroundColor: '#121212',
@@ -153,54 +145,57 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 16,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 24,
+  },
+  headerDark: {
+    backgroundColor: '#121212',
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 32,
+    fontWeight: '800',
     color: '#333333',
   },
   textDark: {
     color: '#FFFFFF',
   },
   textLightDark: {
-    color: '#CCCCCC',
+    color: '#BBBBBB',
   },
   addButton: {
-    flexDirection: 'row',
+    width: 48,
+    height: 48,
     alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 24,
     backgroundColor: '#FFFFFF',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#EEEEEE',
+    shadowColor: '#000',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   addButtonDark: {
     backgroundColor: '#2A2A2A',
-    borderColor: '#3A3A3A',
-  },
-  addButtonText: {
-    marginLeft: 4,
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333333',
+    shadowColor: '#FFFFFF',
   },
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 16,
-    marginBottom: 16,
-    borderRadius: 12,
+    marginHorizontal: 20,
+    marginBottom: 24,
+    borderRadius: 16,
     padding: 4,
-    borderWidth: 1,
-    borderColor: '#EEEEEE',
+    backgroundColor: '#F9F9F9',
+    shadowColor: '#000',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   tabBarDark: {
     backgroundColor: '#2A2A2A',
-    borderColor: '#3A3A3A',
+    shadowColor: '#FFFFFF',
   },
   tab: {
     flex: 1,
@@ -208,65 +203,74 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 12,
     gap: 8,
   },
-  tabDark: {
-    backgroundColor: '#2A2A2A',
-  },
   activeTab: {
-    backgroundColor: '#E7ECFF',
-  },
-  activeTabDark: {
-    backgroundColor: '#344181',
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: -2, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   tabText: {
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 16,
+    fontWeight: '600',
     color: '#666666',
   },
   activeTabText: {
-    color: '#4361EE',
-    fontWeight: '600',
+    color: '#333333',
+    fontWeight: '700',
   },
   content: {
     flex: 1,
   },
   attendanceContainer: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 24,
-    margin: 16,
+    marginHorizontal: 20,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#EEEEEE',
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   attendanceContainerDark: {
     backgroundColor: '#2A2A2A',
-    borderColor: '#3A3A3A',
+    shadowColor: '#FFFFFF',
   },
   attendanceTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: '700',
     color: '#333333',
     marginTop: 16,
     marginBottom: 8,
   },
   attendanceSubtitle: {
     fontSize: 14,
-    
     color: '#666666',
     textAlign: 'center',
     marginBottom: 24,
     lineHeight: 20,
   },
   generateButton: {
-    backgroundColor: '#4361EE',
+    backgroundColor: '#FF6F61',
     paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderRadius: 12,
+    paddingHorizontal: 32,
+    borderRadius: 24,
     width: '100%',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  generateButtonDark: {
+    backgroundColor: '#FF9F1C',
   },
   generateButtonText: {
     color: '#FFFFFF',
@@ -276,10 +280,18 @@ const styles = StyleSheet.create({
   scanButton: {
     backgroundColor: '#4361EE',
     paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderRadius: 12,
+    paddingHorizontal: 32,
+    borderRadius: 24,
     width: '100%',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  scanButtonDark: {
+    backgroundColor: '#7209B7',
   },
   scanButtonText: {
     color: '#FFFFFF',
