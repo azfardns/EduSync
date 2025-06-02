@@ -1,5 +1,8 @@
+// Root layout component managing authentication and navigation structure
 import { useEffect } from 'react';
-import { Stack } from 'expo-router';
+import { StyleSheet } from 'react-native';
+import { useFonts } from 'expo-font';
+import { SplashScreen, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { AuthProvider } from '@/hooks/useAuth';
@@ -7,6 +10,20 @@ import { CourseworkProvider } from '@/hooks/useCoursework';
 
 export default function RootLayout() {
   useFrameworkReady();
+
+  const [fontsLoaded, error] = useFonts({
+    // You can add custom fonts here
+  });
+
+  useEffect(() => {
+    if (fontsLoaded || error) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, error]);
+
+  if (!fontsLoaded && !error) {
+    return null;
+  }
 
   return (
     <AuthProvider>
@@ -22,3 +39,9 @@ export default function RootLayout() {
     </AuthProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});

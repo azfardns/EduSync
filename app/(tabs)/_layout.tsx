@@ -1,6 +1,7 @@
+// Tab navigation layout managing the main app navigation structure
 import { Tabs } from 'expo-router';
 import { useColorScheme } from 'react-native';
-import { Chrome as Home, GraduationCap, ChartBar } from 'lucide-react-native';
+import { Chrome as Home, GraduationCap, User } from 'lucide-react-native';
 import { CoursesProvider } from '@/hooks/useCourses';
 
 export default function TabLayout() {
@@ -38,7 +39,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Home Hub',
+            title: 'Home',
             tabBarIcon: ({ color, size }) => <Home size={24} color={color} />,
           }}
         />
@@ -50,10 +51,10 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="insights"
+          name="profile"
           options={{
-            title: 'Insights',
-            tabBarIcon: ({ color, size }) => <ChartBar size={24} color={color} />,
+            title: 'Profile',
+            tabBarIcon: ({ color, size }) => <User size={24} color={color} />,
           }}
         />
       </Tabs>

@@ -1,8 +1,8 @@
-# DiplomaTrack - Educational Management Platform
+# Edusync - Educational Management Platform
 
 A modern, cross-platform mobile application for managing educational activities, attendance tracking, and coursework management. Built with React Native and Expo.
 
-![DiplomaTrack Banner](https://images.pexels.com/photos/256490/pexels-photo-256490.jpeg?auto=compress&cs=tinysrgb&w=1200)
+![Edusync Banner](https://images.pexels.com/photos/256490/pexels-photo-256490.jpeg?auto=compress&cs=tinysrgb&w=1200)
 
 ## Features
 
@@ -45,7 +45,7 @@ A modern, cross-platform mobile application for managing educational activities,
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd diplomatrack
+cd Edusync
 ```
 
 2. Install dependencies:
@@ -68,7 +68,7 @@ npm run dev
 ## Project Structure
 
 ```
-diplomatrack/
+Edusync/
 ├── app/                    # Application routes
 │   ├── (auth)/            # Authentication routes
 │   ├── (tabs)/            # Main tab navigation

@@ -56,7 +56,7 @@ export default function RegisterScreen() {
           <View style={styles.headerContainer}>
             <Text style={[styles.title, isDark && styles.textDark]}>Create Account</Text>
             <Text style={[styles.subtitle, isDark && styles.textLightDark]}>
-              Join DiplomaTrack to manage your educational activities
+              Join EduSync to manage your educational activities
             </Text>
           </View>
           

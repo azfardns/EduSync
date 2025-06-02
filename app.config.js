@@ -1,11 +1,11 @@
 export default {
   expo: {
-    name: 'DiplomaTrack',
-    slug: 'diplomatrack',
+    name: 'EduSync',
+    slug: 'edusync',
     version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/images/icon.png',
-    scheme: 'diplomatrack',
+    scheme: 'edusync',
     userInterfaceStyle: 'automatic',
     splash: {
       image: './assets/images/icon.png',
@@ -17,14 +17,14 @@ export default {
     ],
     ios: {
       supportsTablet: true,
-      bundleIdentifier: 'com.yourcompany.diplomatrack'
+      bundleIdentifier: 'com.yourcompany.edusync'
     },
     android: {
       adaptiveIcon: {
         foregroundImage: './assets/images/icon.png',
         backgroundColor: '#ffffff'
       },
-      package: 'com.yourcompany.diplomatrack'
+      package: 'com.yourcompany.edusync'
     },
     web: {
       bundler: 'metro',
