@@ -32,9 +32,6 @@ export default function HomeScreen() {
   const renderInstructorDashboard = () => (
     <>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={[styles.actionContainer, isDark && styles.actionContainerDark]}>
-          {isInstructor && ()}
-        </View>
 
         <View style={styles.statsContainer}>
           <DashboardStat
