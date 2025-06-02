@@ -9,6 +9,7 @@ import DashboardStat from '@/components/dashboard/DashboardStat';
 import AddCourseworkModal from '@/components/coursework/AddCourseworkModal';
 import CourseworkList from '@/components/coursework/CourseworkList';
 
+
 export default function HomeScreen() {
   const { user } = useAuth();
   const { courses } = useCourses();
