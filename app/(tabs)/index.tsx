@@ -33,15 +33,6 @@ export default function HomeScreen() {
     <>
       <View style={[styles.header, isDark && styles.headerDark]}>
         <Text style={[styles.headerTitle, isDark && styles.textDark]}>Dashboard</Text>
-        {isInstructor && (
-          <TouchableOpacity
-            style={[styles.addButton, isDark && styles.addButtonDark]}
-            onPress={() => setShowAddModal(true)}
-            activeOpacity={0.8}
-          >
-            <Plus size={20} color={isDark ? '#FFFFFF' : '#FF6F61'} />
-          </TouchableOpacity>
-        )}
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
