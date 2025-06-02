@@ -10,13 +10,12 @@
     "web": "expo start --web",
     "test": "jest --watchAll",
     "eas-build": "npx eas-cli build",
-    "eas-submit": "npx eas-cli submit",
-    "postinstall": "expo-yarn-workspaces postinstall"
+    "eas-submit": "npx eas-cli submit"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.0",
     "@react-navigation/native": "^6.0.2",
-    "expo": "^53.0.9",
+    "expo": "^50.0.0",
     "expo-dev-client": "~3.3.12",
     "expo-font": "~11.10.2",
     "expo-linking": "~6.2.2",
@@ -25,7 +24,6 @@
     "expo-status-bar": "~1.11.1",
     "expo-system-ui": "~2.9.3",
     "expo-web-browser": "~12.8.2",
-    "expo-yarn-workspaces": "^2.3.1",
     "metro": "^0.80.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",
