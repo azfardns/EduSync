@@ -4,11 +4,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/hooks/useAuth';
 import { useCourses } from '@/hooks/useCourses';
 import { useCoursework } from '@/hooks/useCoursework';
-import { QrCode, Clock, Users, Plus } from 'lucide-react-native';
+import { QrCode, Clock, Users } from 'lucide-react-native';
 import DashboardStat from '@/components/dashboard/DashboardStat';
 import AddCourseworkModal from '@/components/coursework/AddCourseworkModal';
 import CourseworkList from '@/components/coursework/CourseworkList';
-
 
 export default function HomeScreen() {
   const { user } = useAuth();
@@ -33,18 +32,9 @@ export default function HomeScreen() {
   const renderInstructorDashboard = () => (
     <>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={[styles.actionContainer, isDark && styles.actionContainerDark]}>
-          {isInstructor && (
-            <TouchableOpacity
-              style={[styles.addButton, isDark && styles.addButtonDark]}
-              onPress={() => setShowAddModal(true)}
-              activeOpacity={0.8}
-            >
-              <Plus size={20} color={isDark ? '#FFFFFF' : '#FF6F61'} />
-            </TouchableOpacity>
-          )}
-        </View>
-
+        {/* Removed the plus button from top action container */}
+        
+        {/* Enhanced stats container with proper margins */}
         <View style={styles.statsContainer}>
           <DashboardStat
             icon={<Users size={24} color="#FF6F61" />}
@@ -116,41 +106,16 @@ const styles = StyleSheet.create({
   containerDark: {
     backgroundColor: '#121212',
   },
-  actionContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 24,
-  },
-  actionContainerDark: {
-    backgroundColor: '#121212',
-  },
-  addButton: {
-    width: 48,
-    height: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 24,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  addButtonDark: {
-    backgroundColor: '#2A2A2A',
-    shadowColor: '#FFFFFF',
-  },
   content: {
     flex: 1,
+    paddingTop: 20, // Added top padding to replace removed action container
   },
   statsContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 20,
+    paddingHorizontal: 20, // Proper margin from screen edges
     marginBottom: 24,
     justifyContent: 'space-between',
+    gap: 12, // Added gap between stat cards for better spacing
   },
   section: {
     padding: 20,
@@ -185,6 +150,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   textLightDark: {
-color: '#BBBBBB',
-},
+    color: '#BBBBBB',
+  },
 });
