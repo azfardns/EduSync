@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, useColorScheme } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { QrCode, BookOpen, Plus } from 'lucide-react-native';
+import { QrCode, BookOpen, Plus, Sparkles } from 'lucide-react-native';
 import { useAuth } from '@/hooks/useAuth';
 import { useCourses } from '@/hooks/useCourses';
 import { useCoursework } from '@/hooks/useCoursework';
@@ -30,18 +30,8 @@ export default function ClassroomScreen() {
 
   return (
     <SafeAreaView style={[styles.container, isDark && styles.containerDark]} edges={['top']}>
-      <View style={[styles.actionContainer, isDark && styles.actionContainerDark]}>
-        {isInstructor && (
-          <TouchableOpacity
-            style={[styles.addButton, isDark && styles.addButtonDark]}
-            onPress={() => setShowAddModal(true)}
-            activeOpacity={0.8}
-          >
-            <Plus size={20} color={isDark ? '#FFFFFF' : '#FF6F61'} />
-          </TouchableOpacity>
-        )}
-      </View>
-
+      {/* Removed the plus button from the top action container */}
+      
       <View style={[styles.tabBar, isDark && styles.tabBarDark]}>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'attendance' && styles.activeTab]}
@@ -81,6 +71,17 @@ export default function ClassroomScreen() {
           >
             Coursework
           </Text>
+          {/* Creative plus button integrated into coursework tab */}
+          {isInstructor && activeTab === 'coursework' && (
+            <TouchableOpacity
+              style={[styles.creativeAddButton, isDark && styles.creativeAddButtonDark]}
+              onPress={() => setShowAddModal(true)}
+              activeOpacity={0.8}
+            >
+              <Sparkles size={14} color="#FFFFFF" />
+              <Plus size={16} color="#FFFFFF" />
+            </TouchableOpacity>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -140,36 +141,10 @@ const styles = StyleSheet.create({
   containerDark: {
     backgroundColor: '#121212',
   },
-  actionContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 24,
-  },
-  actionContainerDark: {
-    backgroundColor: '#121212',
-  },
-  addButton: {
-    width: 48,
-    height: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 24,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  addButtonDark: {
-    backgroundColor: '#2A2A2A',
-    shadowColor: '#FFFFFF',
-  },
   tabBar: {
     flexDirection: 'row',
     marginHorizontal: 20,
+    marginTop: 20,
     marginBottom: 24,
     borderRadius: 16,
     padding: 4,
@@ -192,6 +167,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 12,
     gap: 8,
+    position: 'relative',
   },
   activeTab: {
     backgroundColor: '#FFFFFF',
@@ -215,6 +191,27 @@ const styles = StyleSheet.create({
   },
   textLightDark: {
     color: '#888888',
+  },
+  creativeAddButton: {
+    position: 'absolute',
+    right: 8,
+    top: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#4361EE',
+    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    gap: 2,
+    shadowColor: '#4361EE',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  creativeAddButtonDark: {
+    backgroundColor: '#7209B7',
+    shadowColor: '#7209B7',
   },
   content: {
     flex: 1,
