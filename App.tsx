@@ -5,6 +5,11 @@ import { SplashScreen } from 'expo-router';
 import { Slot } from 'expo-router';
 import 'react-native-url-polyfill/auto';
 
+// Ensure XMLHttpRequest is available globally for network requests
+if (typeof global.XMLHttpRequest === 'undefined') {
+  global.XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
+}
+
 export default function App() {
   const [fontsLoaded, error] = useFonts({
     // You can add custom fonts here
