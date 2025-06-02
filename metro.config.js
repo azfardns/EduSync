@@ -1,13 +1,14 @@
 const { getDefaultConfig } = require('@expo/metro-config');
-const defaultConfig = getDefaultConfig(__dirname);
+
+const config = getDefaultConfig(__dirname);
 
 module.exports = {
-  ...defaultConfig,
+  ...config,
   resolver: {
-    ...defaultConfig.resolver,
-    sourceExts: [...defaultConfig.resolver.sourceExts, 'mjs', 'cjs'],
+    ...config.resolver,
+    sourceExts: [...config.resolver.sourceExts, 'mjs', 'cjs'],
     extraNodeModules: {
-      ...defaultConfig.resolver.extraNodeModules,
+      ...config.resolver.extraNodeModules,
       'events': require.resolve('events'),
       'stream': require.resolve('stream-browserify'),
     },
