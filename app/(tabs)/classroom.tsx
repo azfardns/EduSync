@@ -30,8 +30,7 @@ export default function ClassroomScreen() {
 
   return (
     <SafeAreaView style={[styles.container, isDark && styles.containerDark]} edges={['top']}>
-      <View style={[styles.header, isDark && styles.headerDark]}>
-        <Text style={[styles.headerTitle, isDark && styles.textDark]}>Classroom</Text>
+      <View style={[styles.actionContainer, isDark && styles.actionContainerDark]}>
         {isInstructor && (
           <TouchableOpacity
             style={[styles.addButton, isDark && styles.addButtonDark]}
@@ -51,7 +50,7 @@ export default function ClassroomScreen() {
         >
           <QrCode
             size={20}
-            color={activeTab === 'attendance' ? '#FF6F61' : isDark ? '#BBBBBB' : '#666666'}
+            color={activeTab === 'attendance' ? '#FF6F61' : isDark ? '#666666' : '#BBBBBB'}
           />
           <Text
             style={[
@@ -71,7 +70,7 @@ export default function ClassroomScreen() {
         >
           <BookOpen
             size={20}
-            color={activeTab === 'coursework' ? '#4361EE' : isDark ? '#BBBBBB' : '#666666'}
+            color={activeTab === 'coursework' ? '#4361EE' : isDark ? '#666666' : '#BBBBBB'}
           />
           <Text
             style={[
@@ -141,27 +140,15 @@ const styles = StyleSheet.create({
   containerDark: {
     backgroundColor: '#121212',
   },
-  header: {
+  actionContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    justifyContent: 'flex-end',
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 24,
   },
-  headerDark: {
+  actionContainerDark: {
     backgroundColor: '#121212',
-  },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#333333',
-  },
-  textDark: {
-    color: '#FFFFFF',
-  },
-  textLightDark: {
-    color: '#BBBBBB',
   },
   addButton: {
     width: 48,
@@ -217,11 +204,17 @@ const styles = StyleSheet.create({
   tabText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#666666',
+    color: '#666666', // Darker color for better visibility
   },
   activeTabText: {
-    color: '#333333',
+    color: '#333333', // Even darker for active tab
     fontWeight: '700',
+  },
+  textDark: {
+    color: '#BBBBBB', // Lighter gray for dark mode, ensuring contrast
+  },
+  textLightDark: {
+    color: '#888888',
   },
   content: {
     flex: 1,
