@@ -50,13 +50,6 @@ export default function HomeScreen() {
           >
             <Filter size={20} color={isDark ? '#FFFFFF' : '#333333'} />
           </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.addButton, isDark && styles.addButtonDark]}
-            onPress={() => setShowAddModal(true)}
-          >
-            <Plus size={20} color={isDark ? '#FFFFFF' : '#333333'} />
-            <Text style={[styles.addButtonText, isDark && styles.textDark]}>Add New</Text>
-          </TouchableOpacity>
         </View>
       </View>
 
