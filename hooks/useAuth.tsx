@@ -7,6 +7,7 @@ type User = {
   email: string;
   name: string;
   role: 'student' | 'instructor' | 'admin';
+  enrollment_completed?: boolean;
 };
 
 type Session = {
@@ -47,7 +48,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           if (profileError) throw profileError;
           
           if (!profile) {
-            // If no profile exists, sign out the user to clear the inconsistent state
             await signOut();
             throw new Error('User profile not found. Please sign in again or contact support.');
           }
@@ -58,6 +58,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               email: session.user.email!,
               name: profile.name,
               role: profile.role,
+              enrollment_completed: profile.enrollment_completed,
             },
             token: session.access_token,
           };
@@ -67,7 +68,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       } catch (error) {
         console.error('Error checking session:', error);
-        // Ensure user and session are cleared in case of error
         setSession(null);
         setUser(null);
       } finally {
@@ -107,6 +107,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           email: data.user.email!,
           name: profile.name,
           role: profile.role,
+          enrollment_completed: profile.enrollment_completed,
         },
         token: data.session.access_token,
       };
@@ -140,6 +141,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               name,
               role,
               email,
+              enrollment_completed: false,
             },
           ]);
           
@@ -151,6 +153,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             email: data.user.email!,
             name,
             role: role as 'student' | 'instructor' | 'admin',
+            enrollment_completed: false,
           },
           token: data.session?.access_token || '',
         };

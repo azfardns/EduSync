@@ -1,19 +1,17 @@
 import React, { useState } from 'react';
 import {
-  Modal,
   View,
   Text,
-  TextInput,
-  TouchableOpacity,
   StyleSheet,
+  Modal,
+  TouchableOpacity,
+  TextInput,
   ScrollView,
   useColorScheme,
   Platform,
 } from 'react-native';
-import DateTimePicker from '@react-native-datetimepicker/datetimepicker';
-import DateTimePicker from '@react-native-datetimepicker/datetimepicker';
-
-import { ChevronDown, X, CircleAlert as AlertCircle } from 'lucide-react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { ChevronDown, X, AlertCircle as AlertCircle } from 'lucide-react-native';
 
 interface Course {
   id: string;

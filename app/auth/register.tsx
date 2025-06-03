@@ -38,7 +38,11 @@ export default function RegisterScreen() {
     setIsLoading(true);
     try {
       await signUp(email.trim(), password, name, userType);
-      router.replace('/(tabs)');
+      if (userType === 'student') {
+        router.replace('/auth/enrollment');
+      } else {
+        router.replace('/(tabs)');
+      }
     } catch (error: any) {
       Alert.alert('Registration Failed', error.message);
     } finally {
