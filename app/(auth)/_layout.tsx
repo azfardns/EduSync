@@ -33,6 +33,13 @@ export default function AuthLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="enrollment"
+        options={{
+          title: 'Enrollment',
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }
