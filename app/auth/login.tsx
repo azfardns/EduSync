@@ -98,7 +98,7 @@ export default function LoginScreen() {
             
             <View style={styles.footerContainer}>
               <Text style={[styles.footerText, isDark && styles.textLightDark]}>
-                Don't have an account?
+                Don't have an account?{' '}
               </Text>
               <Link href="/auth/register" asChild>
                 <TouchableOpacity>
@@ -203,7 +203,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: 24,
-    gap: 4,
   },
   footerText: {
     color: '#666666',
