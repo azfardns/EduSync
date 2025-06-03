@@ -1,8 +1,8 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Check } from 'lucide-react-native';
-import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/hooks/useSupabase';
 
 export default function EnrollmentScreen() {
   const { courseId } = useLocalSearchParams();

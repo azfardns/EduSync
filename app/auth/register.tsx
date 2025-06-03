@@ -37,24 +37,21 @@ export default function RegisterScreen() {
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    // Email validation
     if (!email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!validateEmail(email.trim())) {
       newErrors.email = 'Please enter a valid email address';
     }
 
-    // Password validation
     if (!password) {
       newErrors.password = 'Password is required';
     } else {
       const passwordErrors = validatePassword(password);
       if (passwordErrors.length > 0) {
-        newErrors.password = passwordErrors[0]; // Show first error
+        newErrors.password = passwordErrors[0];
       }
     }
 
-    // Confirm password validation
     if (!confirmPassword) {
       newErrors.confirmPassword = 'Password confirmation is required';
     } else if (password !== confirmPassword) {
@@ -71,9 +68,7 @@ export default function RegisterScreen() {
     setIsLoading(true);
     try {
       await signUp(email.trim(), password);
-      // Router will be handled by the auth hook based on enrollment status
     } catch (error: any) {
-      // Check for specific Supabase error messages
       if (error.message === 'User already registered') {
         Alert.alert(
           'Account Exists',
@@ -224,13 +219,13 @@ export default function RegisterScreen() {
             
             <View style={styles.footerContainer}>
               <Text style={[styles.footerText, isDark && styles.textLightDark]}>
-                Already have an account?{' '}
-                <Link href="/auth/login" asChild>
-                  <TouchableOpacity>
-                    <Text style={styles.linkText}>Sign In</Text>
-                  </TouchableOpacity>
-                </Link>
+                Already have an account?
               </Text>
+              <Link href="/auth/login" asChild>
+                <TouchableOpacity>
+                  <Text style={styles.linkText}>Sign In</Text>
+                </TouchableOpacity>
+              </Link>
             </View>
           </View>
         </ScrollView>
@@ -342,6 +337,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: 24,
+    gap: 4,
   },
   footerText: {
     color: '#6B7280',
