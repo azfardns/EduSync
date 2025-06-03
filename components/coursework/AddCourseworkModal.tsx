@@ -10,7 +10,9 @@ import {
   useColorScheme,
   Platform,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker from '@react-native-datetimepicker/datetimepicker';
+import DateTimePicker from '@react-native-datetimepicker/datetimepicker';
+
 import { ChevronDown, X, CircleAlert as AlertCircle } from 'lucide-react-native';
 
 interface Course {
