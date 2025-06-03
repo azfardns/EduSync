@@ -14,7 +14,7 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import { useAcademicData } from '@/hooks/useAcademicData';
 import { useCourses } from '@/hooks/useCourses';
-import { ChevronDown, AlertTriangle } from 'lucide-react-native';
+import { ChevronDown, TriangleAlert as AlertTriangle } from 'lucide-react-native';
 
 export default function EnrollmentScreen() {
   const { user } = useAuth();
