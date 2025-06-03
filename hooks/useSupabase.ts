@@ -1,12 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
-import Constants from 'expo-constants';
+import 'react-native-url-polyfill/auto';
 
-// Get environment variables
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables. Please check your .env file.');
+  throw new Error('Missing Supabase environment variables');
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
