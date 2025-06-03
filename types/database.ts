@@ -17,6 +17,12 @@ export interface Database {
           email: string
           created_at: string
           updated_at: string
+          enrollment_completed: boolean
+          faculty_id: string | null
+          program_id: string | null
+          enrollment_locked: boolean
+          year_of_study: number | null
+          full_name: string | null
         }
         Insert: {
           id: string
@@ -25,12 +31,67 @@ export interface Database {
           email: string
           created_at?: string
           updated_at?: string
+          enrollment_completed?: boolean
+          faculty_id?: string | null
+          program_id?: string | null
+          enrollment_locked?: boolean
+          year_of_study?: number | null
+          full_name?: string | null
         }
         Update: {
           id?: string
           name?: string
           role?: 'student' | 'instructor' | 'admin'
           email?: string
+          created_at?: string
+          updated_at?: string
+          enrollment_completed?: boolean
+          faculty_id?: string | null
+          program_id?: string | null
+          enrollment_locked?: boolean
+          year_of_study?: number | null
+          full_name?: string | null
+        }
+      }
+      faculties: {
+        Row: {
+          id: string
+          name: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      programs: {
+        Row: {
+          id: string
+          name: string
+          faculty_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          faculty_id: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          faculty_id?: string
           created_at?: string
           updated_at?: string
         }
