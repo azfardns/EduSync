@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Mail, Lock, Eye, EyeOff, AlertTriangle } from 'lucide-react-native';
+import { Mail, Lock, Eye, EyeOff, TriangleAlert as AlertTriangle } from 'lucide-react-native';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function RegisterScreen() {
