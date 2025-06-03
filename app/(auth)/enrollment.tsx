@@ -1,0 +1,569 @@
+import { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Alert,
+  useColorScheme,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { useAuth } from '@/hooks/useAuth';
+import { useAcademicData } from '@/hooks/useAcademicData';
+import { useCourses } from '@/hooks/useCourses';
+import { ChevronDown, AlertTriangle } from 'lucide-react-native';
+
+export default function EnrollmentScreen() {
+  const { user } = useAuth();
+  const router = useRouter();
+  const { academicPrograms, departments, isLoading: isAcademicDataLoading } = useAcademicData();
+  const { courses } = useCourses();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+
+  const [firstName, setFirstName] = useState('');
+  const [middleName, setMiddleName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
+  const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
+  const [yearLevel, setYearLevel] = useState('');
+  const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
+  const [showProgramDropdown, setShowProgramDropdown] = useState(false);
+  const [showDepartmentDropdown, setShowDepartmentDropdown] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!firstName.trim()) newErrors.firstName = 'First name is required';
+    if (!lastName.trim()) newErrors.lastName = 'Last name is required';
+    if (!selectedProgram) newErrors.program = 'Academic program is required';
+    if (!selectedDepartment) newErrors.department = 'Department is required';
+    if (!yearLevel) {
+      newErrors.yearLevel = 'Year level is required';
+    } else {
+      const year = parseInt(yearLevel);
+      if (isNaN(year) || year < 1 || year > 6) {
+        newErrors.yearLevel = 'Year level must be between 1 and 6';
+      }
+    }
+    if (selectedCourses.length === 0) newErrors.courses = 'Please select at least one course';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          first_name: firstName.trim(),
+          middle_name: middleName.trim() || null,
+          last_name: lastName.trim(),
+          academic_program_id: selectedProgram,
+          department_id: selectedDepartment,
+          year_level: parseInt(yearLevel),
+          enrollment_completed: true,
+        })
+        .eq('id', user?.id);
+
+      if (error) throw error;
+
+      // Create enrollments
+      const enrollmentPromises = selectedCourses.map((courseId) =>
+        supabase.from('enrollments').insert({
+          student_id: user?.id,
+          course_id: courseId,
+        })
+      );
+
+      await Promise.all(enrollmentPromises);
+
+      router.replace('/(tabs)');
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
+    }
+  };
+
+  if (isAcademicDataLoading) {
+    return (
+      <View style={[styles.container, isDark && styles.containerDark]}>
+        <Text style={[styles.loadingText, isDark && styles.textDark]}>Loading...</Text>
+      </View>
+    );
+  }
+
+  return (
+    <SafeAreaView style={[styles.container, isDark && styles.containerDark]}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <Text style={[styles.title, isDark && styles.textDark]}>Complete Your Profile</Text>
+          <Text style={[styles.subtitle, isDark && styles.textLightDark]}>
+            Please provide your academic information to complete enrollment
+          </Text>
+        </View>
+
+        <View style={styles.form}>
+          <View style={styles.formGroup}>
+            <Text style={[styles.label, isDark && styles.textDark]}>First Name *</Text>
+            <TextInput
+              style={[
+                styles.input,
+                isDark && styles.inputDark,
+                errors.firstName && styles.inputError,
+              ]}
+              value={firstName}
+              onChangeText={setFirstName}
+              placeholder="Enter your first name"
+              placeholderTextColor={isDark ? '#666666' : '#999999'}
+            />
+            {errors.firstName && (
+              <View style={styles.errorContainer}>
+                <AlertTriangle size={16} color="#FF6B6B" />
+                <Text style={styles.errorText}>{errors.firstName}</Text>
+              </View>
+            )}
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={[styles.label, isDark && styles.textDark]}>Middle Name (Optional)</Text>
+            <TextInput
+              style={[styles.input, isDark && styles.inputDark]}
+              value={middleName}
+              onChangeText={setMiddleName}
+              placeholder="Enter your middle name"
+              placeholderTextColor={isDark ? '#666666' : '#999999'}
+            />
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={[styles.label, isDark && styles.textDark]}>Last Name *</Text>
+            <TextInput
+              style={[
+                styles.input,
+                isDark && styles.inputDark,
+                errors.lastName && styles.inputError,
+              ]}
+              value={lastName}
+              onChangeText={setLastName}
+              placeholder="Enter your last name"
+              placeholderTextColor={isDark ? '#666666' : '#999999'}
+            />
+            {errors.lastName && (
+              <View style={styles.errorContainer}>
+                <AlertTriangle size={16} color="#FF6B6B" />
+                <Text style={styles.errorText}>{errors.lastName}</Text>
+              </View>
+            )}
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={[styles.label, isDark && styles.textDark]}>Academic Program *</Text>
+            <TouchableOpacity
+              style={[
+                styles.dropdown,
+                isDark && styles.dropdownDark,
+                errors.program && styles.inputError,
+              ]}
+              onPress={() => setShowProgramDropdown(!showProgramDropdown)}
+            >
+              <Text
+                style={[
+                  styles.dropdownText,
+                  isDark && styles.textDark,
+                  !selectedProgram && styles.placeholder,
+                ]}
+              >
+                {selectedProgram
+                  ? academicPrograms.find((p) => p.id === selectedProgram)?.name
+                  : 'Select your program'}
+              </Text>
+              <ChevronDown size={20} color={isDark ? '#BBBBBB' : '#666666'} />
+            </TouchableOpacity>
+            {showProgramDropdown && (
+              <View style={[styles.dropdownList, isDark && styles.dropdownListDark]}>
+                {academicPrograms.map((program) => (
+                  <TouchableOpacity
+                    key={program.id}
+                    style={[
+                      styles.dropdownItem,
+                      isDark && styles.dropdownItemDark,
+                      selectedProgram === program.id && styles.dropdownItemSelected,
+                    ]}
+                    onPress={() => {
+                      setSelectedProgram(program.id);
+                      setShowProgramDropdown(false);
+                      setErrors((prev) => ({ ...prev, program: '' }));
+                    }}
+                  >
+                    <Text
+                      style={[
+                        styles.dropdownItemText,
+                        isDark && styles.textDark,
+                        selectedProgram === program.id && styles.dropdownItemTextSelected,
+                      ]}
+                    >
+                      {program.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+            {errors.program && (
+              <View style={styles.errorContainer}>
+                <AlertTriangle size={16} color="#FF6B6B" />
+                <Text style={styles.errorText}>{errors.program}</Text>
+              </View>
+            )}
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={[styles.label, isDark && styles.textDark]}>Department *</Text>
+            <TouchableOpacity
+              style={[
+                styles.dropdown,
+                isDark && styles.dropdownDark,
+                errors.department && styles.inputError,
+              ]}
+              onPress={() => setShowDepartmentDropdown(!showDepartmentDropdown)}
+            >
+              <Text
+                style={[
+                  styles.dropdownText,
+                  isDark && styles.textDark,
+                  !selectedDepartment && styles.placeholder,
+                ]}
+              >
+                {selectedDepartment
+                  ? departments.find((d) => d.id === selectedDepartment)?.name
+                  : 'Select your department'}
+              </Text>
+              <ChevronDown size={20} color={isDark ? '#BBBBBB' : '#666666'} />
+            </TouchableOpacity>
+            {showDepartmentDropdown && (
+              <View style={[styles.dropdownList, isDark && styles.dropdownListDark]}>
+                {departments.map((department) => (
+                  <TouchableOpacity
+                    key={department.id}
+                    style={[
+                      styles.dropdownItem,
+                      isDark && styles.dropdownItemDark,
+                      selectedDepartment === department.id && styles.dropdownItemSelected,
+                    ]}
+                    onPress={() => {
+                      setSelectedDepartment(department.id);
+                      setShowDepartmentDropdown(false);
+                      setErrors((prev) => ({ ...prev, department: '' }));
+                    }}
+                  >
+                    <Text
+                      style={[
+                        styles.dropdownItemText,
+                        isDark && styles.textDark,
+                        selectedDepartment === department.id && styles.dropdownItemTextSelected,
+                      ]}
+                    >
+                      {department.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+            {errors.department && (
+              <View style={styles.errorContainer}>
+                <AlertTriangle size={16} color="#FF6B6B" />
+                <Text style={styles.errorText}>{errors.department}</Text>
+              </View>
+            )}
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={[styles.label, isDark && styles.textDark]}>Year Level *</Text>
+            <TextInput
+              style={[
+                styles.input,
+                isDark && styles.inputDark,
+                errors.yearLevel && styles.inputError,
+              ]}
+              value={yearLevel}
+              onChangeText={(text) => {
+                setYearLevel(text);
+                if (errors.yearLevel) {
+                  setErrors((prev) => ({ ...prev, yearLevel: '' }));
+                }
+              }}
+              placeholder="Enter your year level (1-6)"
+              placeholderTextColor={isDark ? '#666666' : '#999999'}
+              keyboardType="number-pad"
+              maxLength={1}
+            />
+            {errors.yearLevel && (
+              <View style={styles.errorContainer}>
+                <AlertTriangle size={16} color="#FF6B6B" />
+                <Text style={styles.errorText}>{errors.yearLevel}</Text>
+              </View>
+            )}
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={[styles.label, isDark && styles.textDark]}>Course Selection *</Text>
+            <Text style={[styles.warning, isDark && styles.warningDark]}>
+              Course selections are final and cannot be modified after submission
+            </Text>
+            <View style={styles.courseList}>
+              {courses.map((course) => (
+                <TouchableOpacity
+                  key={course.id}
+                  style={[
+                    styles.courseItem,
+                    isDark && styles.courseItemDark,
+                    selectedCourses.includes(course.id) && styles.courseItemSelected,
+                  ]}
+                  onPress={() => {
+                    setSelectedCourses((prev) =>
+                      prev.includes(course.id)
+                        ? prev.filter((id) => id !== course.id)
+                        : [...prev, course.id]
+                    );
+                    if (errors.courses) {
+                      setErrors((prev) => ({ ...prev, courses: '' }));
+                    }
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.courseTitle,
+                      isDark && styles.textDark,
+                      selectedCourses.includes(course.id) && styles.courseTextSelected,
+                    ]}
+                  >
+                    {course.title}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.courseCode,
+                      isDark && styles.textLightDark,
+                      selectedCourses.includes(course.id) && styles.courseTextSelected,
+                    ]}
+                  >
+                    {course.code}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            {errors.courses && (
+              <View style={styles.errorContainer}>
+                <AlertTriangle size={16} color="#FF6B6B" />
+                <Text style={styles.errorText}>{errors.courses}</Text>
+              </View>
+            )}
+          </View>
+        </View>
+
+        <TouchableOpacity
+          style={[styles.submitButton, isDark && styles.submitButtonDark]}
+          onPress={handleSubmit}
+        >
+          <Text style={styles.submitButtonText}>Complete Enrollment</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F5F5F5',
+  },
+  containerDark: {
+    backgroundColor: '#121212',
+  },
+  scrollView: {
+    flex: 1,
+    padding: 20,
+  },
+  header: {
+    marginBottom: 32,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#333333',
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666666',
+    lineHeight: 24,
+  },
+  textDark: {
+    color: '#FFFFFF',
+  },
+  textLightDark: {
+    color: '#BBBBBB',
+  },
+  form: {
+    gap: 24,
+  },
+  formGroup: {
+    gap: 8,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333333',
+  },
+  input: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 16,
+    color: '#333333',
+    borderWidth: 1,
+    borderColor: '#EEEEEE',
+  },
+  inputDark: {
+    backgroundColor: '#2A2A2A',
+    borderColor: '#3A3A3A',
+    color: '#FFFFFF',
+  },
+  inputError: {
+    borderColor: '#FF6B6B',
+    borderWidth: 2,
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  errorText: {
+    marginLeft: 8,
+    color: '#FF6B6B',
+    fontSize: 14,
+  },
+  dropdown: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#EEEEEE',
+  },
+  dropdownDark: {
+    backgroundColor: '#2A2A2A',
+    borderColor: '#3A3A3A',
+  },
+  dropdownText: {
+    fontSize: 16,
+    color: '#333333',
+  },
+  placeholder: {
+    color: '#999999',
+  },
+  dropdownList: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#EEEEEE',
+    maxHeight: 200,
+  },
+  dropdownListDark: {
+    backgroundColor: '#2A2A2A',
+    borderColor: '#3A3A3A',
+  },
+  dropdownItem: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
+  },
+  dropdownItemDark: {
+    borderBottomColor: '#3A3A3A',
+  },
+  dropdownItemSelected: {
+    backgroundColor: '#E7ECFF',
+  },
+  dropdownItemText: {
+    fontSize: 16,
+    color: '#333333',
+  },
+  dropdownItemTextSelected: {
+    color: '#4361EE',
+    fontWeight: '600',
+  },
+  warning: {
+    backgroundColor: '#FFF3CD',
+    color: '#856404',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 8,
+    marginBottom: 16,
+    fontSize: 14,
+  },
+  warningDark: {
+    backgroundColor: '#483C14',
+    color: '#FFB74D',
+  },
+  courseList: {
+    gap: 12,
+  },
+  courseItem: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#EEEEEE',
+  },
+  courseItemDark: {
+    backgroundColor: '#2A2A2A',
+    borderColor: '#3A3A3A',
+  },
+  courseItemSelected: {
+    backgroundColor: '#E7ECFF',
+    borderColor: '#4361EE',
+  },
+  courseTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333333',
+    marginBottom: 4,
+  },
+  courseCode: {
+    fontSize: 14,
+    color: '#666666',
+  },
+  courseTextSelected: {
+    color: '#4361EE',
+  },
+  submitButton: {
+    backgroundColor: '#4361EE',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 32,
+    marginBottom: 20,
+  },
+  submitButtonDark: {
+    backgroundColor: '#4361EE',
+  },
+  submitButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#666666',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+});
