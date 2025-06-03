@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,13 +8,15 @@ import {
   ScrollView,
   Alert,
   useColorScheme,
+  BackHandler,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import { useAcademicData } from '@/hooks/useAcademicData';
 import { useCourses } from '@/hooks/useCourses';
-import { ChevronDown, TriangleAlert as AlertTriangle } from 'lucide-react-native';
+import { supabase } from '@/hooks/useSupabase';
+import { ChevronDown, TriangleAlert as AlertTriangle, Lock } from 'lucide-react-native';
 
 export default function EnrollmentScreen() {
   const { user } = useAuth();
@@ -24,9 +26,7 @@ export default function EnrollmentScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 
-  const [firstName, setFirstName] = useState('');
-  const [middleName, setMiddleName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [fullName, setFullName] = useState('');
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
   const [yearLevel, setYearLevel] = useState('');
@@ -34,14 +34,64 @@ export default function EnrollmentScreen() {
   const [showProgramDropdown, setShowProgramDropdown] = useState(false);
   const [showDepartmentDropdown, setShowDepartmentDropdown] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Disable back button to prevent navigation away
+  useEffect(() => {
+    const backAction = () => {
+      Alert.alert(
+        'Enrollment Required',
+        'You must complete your enrollment before accessing the app.',
+        [{ text: 'OK' }]
+      );
+      return true; // Prevent default back action
+    };
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    return () => backHandler.remove();
+  }, []);
+
+  // Prevent navigation away from this screen
+  useEffect(() => {
+    const preventNavigation = () => {
+      if (!user?.enrollment_completed) {
+        router.replace('/(auth)/enrollment');
+      }
+    };
+
+    // Check on mount and when user data changes
+    preventNavigation();
+  }, [user, router]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!firstName.trim()) newErrors.firstName = 'First name is required';
-    if (!lastName.trim()) newErrors.lastName = 'Last name is required';
-    if (!selectedProgram) newErrors.program = 'Academic program is required';
-    if (!selectedDepartment) newErrors.department = 'Department is required';
+    if (!fullName.trim()) {
+      newErrors.fullName = 'Full name is required';
+    } else if (fullName.trim().length < 2) {
+      newErrors.fullName = 'Full name must be at least 2 characters';
+    }
+
+    if (!selectedProgram) {
+      newErrors.program = 'Academic program is required';
+    } else {
+      // Validate program exists in database
+      const programExists = academicPrograms.find(p => p.id === selectedProgram);
+      if (!programExists) {
+        newErrors.program = 'Selected program is invalid';
+      }
+    }
+
+    if (!selectedDepartment) {
+      newErrors.department = 'Department is required';
+    } else {
+      // Validate department exists in database
+      const departmentExists = departments.find(d => d.id === selectedDepartment);
+      if (!departmentExists) {
+        newErrors.department = 'Selected department is invalid';
+      }
+    }
+
     if (!yearLevel) {
       newErrors.yearLevel = 'Year level is required';
     } else {
@@ -50,22 +100,40 @@ export default function EnrollmentScreen() {
         newErrors.yearLevel = 'Year level must be between 1 and 6';
       }
     }
-    if (selectedCourses.length === 0) newErrors.courses = 'Please select at least one course';
+
+    if (selectedCourses.length === 0) {
+      newErrors.courses = 'Please select at least one course';
+    } else {
+      // Validate all selected courses exist in database
+      const invalidCourses = selectedCourses.filter(
+        courseId => !courses.find(c => c.id === courseId)
+      );
+      if (invalidCourses.length > 0) {
+        newErrors.courses = 'Some selected courses are invalid';
+      }
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      Alert.alert(
+        'Validation Error',
+        'Please correct the errors in the form before submitting.'
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
+      // Update user profile with enrollment data
+      const { error: profileError } = await supabase
         .from('profiles')
         .update({
-          first_name: firstName.trim(),
-          middle_name: middleName.trim() || null,
-          last_name: lastName.trim(),
+          name: fullName.trim(),
           academic_program_id: selectedProgram,
           department_id: selectedDepartment,
           year_level: parseInt(yearLevel),
@@ -73,9 +141,9 @@ export default function EnrollmentScreen() {
         })
         .eq('id', user?.id);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
 
-      // Create enrollments
+      // Create course enrollments
       const enrollmentPromises = selectedCourses.map((courseId) =>
         supabase.from('enrollments').insert({
           student_id: user?.id,
@@ -83,19 +151,44 @@ export default function EnrollmentScreen() {
         })
       );
 
-      await Promise.all(enrollmentPromises);
+      const enrollmentResults = await Promise.all(enrollmentPromises);
+      
+      // Check for enrollment errors
+      const enrollmentError = enrollmentResults.find(result => result.error);
+      if (enrollmentError?.error) throw enrollmentError.error;
 
-      router.replace('/(tabs)');
+      Alert.alert(
+        'Enrollment Complete!',
+        'Your enrollment has been successfully submitted. Welcome to the app!',
+        [
+          {
+            text: 'Continue',
+            onPress: () => {
+              router.replace('/(tabs)');
+            },
+          },
+        ]
+      );
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      console.error('Enrollment error:', error);
+      Alert.alert(
+        'Enrollment Failed',
+        error.message || 'An error occurred during enrollment. Please try again.'
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   if (isAcademicDataLoading) {
     return (
-      <View style={[styles.container, isDark && styles.containerDark]}>
-        <Text style={[styles.loadingText, isDark && styles.textDark]}>Loading...</Text>
-      </View>
+      <SafeAreaView style={[styles.container, isDark && styles.containerDark]}>
+        <View style={styles.loadingContainer}>
+          <Text style={[styles.loadingText, isDark && styles.textDark]}>
+            Loading enrollment form...
+          </Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
@@ -103,66 +196,60 @@ export default function EnrollmentScreen() {
     <SafeAreaView style={[styles.container, isDark && styles.containerDark]}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Text style={[styles.title, isDark && styles.textDark]}>Complete Your Profile</Text>
+          <View style={styles.lockIconContainer}>
+            <Lock size={32} color="#FF6B6B" />
+          </View>
+          <Text style={[styles.title, isDark && styles.textDark]}>
+            Complete Your Enrollment
+          </Text>
           <Text style={[styles.subtitle, isDark && styles.textLightDark]}>
-            Please provide your academic information to complete enrollment
+            This is a one-time enrollment form. You must complete this before accessing the app.
+          </Text>
+        </View>
+
+        {/* Immutability Warning */}
+        <View style={[styles.warningCard, isDark && styles.warningCardDark]}>
+          <View style={styles.warningHeader}>
+            <AlertTriangle size={24} color="#FF6B6B" />
+            <Text style={styles.warningTitle}>Important Notice</Text>
+          </View>
+          <Text style={[styles.warningText, isDark && styles.warningTextDark]}>
+            Your enrollment selections are permanent and cannot be modified later. 
+            Please review all information carefully before submitting.
           </Text>
         </View>
 
         <View style={styles.form}>
+          {/* Full Name Field */}
           <View style={styles.formGroup}>
-            <Text style={[styles.label, isDark && styles.textDark]}>First Name *</Text>
+            <Text style={[styles.label, isDark && styles.textDark]}>Full Name *</Text>
             <TextInput
               style={[
                 styles.input,
                 isDark && styles.inputDark,
-                errors.firstName && styles.inputError,
+                errors.fullName && styles.inputError,
               ]}
-              value={firstName}
-              onChangeText={setFirstName}
-              placeholder="Enter your first name"
+              value={fullName}
+              onChangeText={(text) => {
+                setFullName(text);
+                if (errors.fullName) {
+                  setErrors((prev) => ({ ...prev, fullName: '' }));
+                }
+              }}
+              placeholder="Enter your complete full name"
               placeholderTextColor={isDark ? '#666666' : '#999999'}
+              autoCapitalize="words"
+              maxLength={100}
             />
-            {errors.firstName && (
+            {errors.fullName && (
               <View style={styles.errorContainer}>
                 <AlertTriangle size={16} color="#FF6B6B" />
-                <Text style={styles.errorText}>{errors.firstName}</Text>
+                <Text style={styles.errorText}>{errors.fullName}</Text>
               </View>
             )}
           </View>
 
-          <View style={styles.formGroup}>
-            <Text style={[styles.label, isDark && styles.textDark]}>Middle Name (Optional)</Text>
-            <TextInput
-              style={[styles.input, isDark && styles.inputDark]}
-              value={middleName}
-              onChangeText={setMiddleName}
-              placeholder="Enter your middle name"
-              placeholderTextColor={isDark ? '#666666' : '#999999'}
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={[styles.label, isDark && styles.textDark]}>Last Name *</Text>
-            <TextInput
-              style={[
-                styles.input,
-                isDark && styles.inputDark,
-                errors.lastName && styles.inputError,
-              ]}
-              value={lastName}
-              onChangeText={setLastName}
-              placeholder="Enter your last name"
-              placeholderTextColor={isDark ? '#666666' : '#999999'}
-            />
-            {errors.lastName && (
-              <View style={styles.errorContainer}>
-                <AlertTriangle size={16} color="#FF6B6B" />
-                <Text style={styles.errorText}>{errors.lastName}</Text>
-              </View>
-            )}
-          </View>
-
+          {/* Academic Program Dropdown */}
           <View style={styles.formGroup}>
             <Text style={[styles.label, isDark && styles.textDark]}>Academic Program *</Text>
             <TouchableOpacity
@@ -172,6 +259,7 @@ export default function EnrollmentScreen() {
                 errors.program && styles.inputError,
               ]}
               onPress={() => setShowProgramDropdown(!showProgramDropdown)}
+              disabled={isSubmitting}
             >
               <Text
                 style={[
@@ -182,37 +270,39 @@ export default function EnrollmentScreen() {
               >
                 {selectedProgram
                   ? academicPrograms.find((p) => p.id === selectedProgram)?.name
-                  : 'Select your program'}
+                  : 'Select your academic program'}
               </Text>
               <ChevronDown size={20} color={isDark ? '#BBBBBB' : '#666666'} />
             </TouchableOpacity>
             {showProgramDropdown && (
               <View style={[styles.dropdownList, isDark && styles.dropdownListDark]}>
-                {academicPrograms.map((program) => (
-                  <TouchableOpacity
-                    key={program.id}
-                    style={[
-                      styles.dropdownItem,
-                      isDark && styles.dropdownItemDark,
-                      selectedProgram === program.id && styles.dropdownItemSelected,
-                    ]}
-                    onPress={() => {
-                      setSelectedProgram(program.id);
-                      setShowProgramDropdown(false);
-                      setErrors((prev) => ({ ...prev, program: '' }));
-                    }}
-                  >
-                    <Text
+                <ScrollView style={styles.dropdownScrollView} nestedScrollEnabled>
+                  {academicPrograms.map((program) => (
+                    <TouchableOpacity
+                      key={program.id}
                       style={[
-                        styles.dropdownItemText,
-                        isDark && styles.textDark,
-                        selectedProgram === program.id && styles.dropdownItemTextSelected,
+                        styles.dropdownItem,
+                        isDark && styles.dropdownItemDark,
+                        selectedProgram === program.id && styles.dropdownItemSelected,
                       ]}
+                      onPress={() => {
+                        setSelectedProgram(program.id);
+                        setShowProgramDropdown(false);
+                        setErrors((prev) => ({ ...prev, program: '' }));
+                      }}
                     >
-                      {program.name}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                      <Text
+                        style={[
+                          styles.dropdownItemText,
+                          isDark && styles.textDark,
+                          selectedProgram === program.id && styles.dropdownItemTextSelected,
+                        ]}
+                      >
+                        {program.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
               </View>
             )}
             {errors.program && (
@@ -223,6 +313,7 @@ export default function EnrollmentScreen() {
             )}
           </View>
 
+          {/* Department Dropdown */}
           <View style={styles.formGroup}>
             <Text style={[styles.label, isDark && styles.textDark]}>Department *</Text>
             <TouchableOpacity
@@ -232,6 +323,7 @@ export default function EnrollmentScreen() {
                 errors.department && styles.inputError,
               ]}
               onPress={() => setShowDepartmentDropdown(!showDepartmentDropdown)}
+              disabled={isSubmitting}
             >
               <Text
                 style={[
@@ -248,31 +340,33 @@ export default function EnrollmentScreen() {
             </TouchableOpacity>
             {showDepartmentDropdown && (
               <View style={[styles.dropdownList, isDark && styles.dropdownListDark]}>
-                {departments.map((department) => (
-                  <TouchableOpacity
-                    key={department.id}
-                    style={[
-                      styles.dropdownItem,
-                      isDark && styles.dropdownItemDark,
-                      selectedDepartment === department.id && styles.dropdownItemSelected,
-                    ]}
-                    onPress={() => {
-                      setSelectedDepartment(department.id);
-                      setShowDepartmentDropdown(false);
-                      setErrors((prev) => ({ ...prev, department: '' }));
-                    }}
-                  >
-                    <Text
+                <ScrollView style={styles.dropdownScrollView} nestedScrollEnabled>
+                  {departments.map((department) => (
+                    <TouchableOpacity
+                      key={department.id}
                       style={[
-                        styles.dropdownItemText,
-                        isDark && styles.textDark,
-                        selectedDepartment === department.id && styles.dropdownItemTextSelected,
+                        styles.dropdownItem,
+                        isDark && styles.dropdownItemDark,
+                        selectedDepartment === department.id && styles.dropdownItemSelected,
                       ]}
+                      onPress={() => {
+                        setSelectedDepartment(department.id);
+                        setShowDepartmentDropdown(false);
+                        setErrors((prev) => ({ ...prev, department: '' }));
+                      }}
                     >
-                      {department.name}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                      <Text
+                        style={[
+                          styles.dropdownItemText,
+                          isDark && styles.textDark,
+                          selectedDepartment === department.id && styles.dropdownItemTextSelected,
+                        ]}
+                      >
+                        {department.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
               </View>
             )}
             {errors.department && (
@@ -283,8 +377,9 @@ export default function EnrollmentScreen() {
             )}
           </View>
 
+          {/* Year Level Field */}
           <View style={styles.formGroup}>
-            <Text style={[styles.label, isDark && styles.textDark]}>Year Level *</Text>
+            <Text style={[styles.label, isDark && styles.textDark]}>Year of Study *</Text>
             <TextInput
               style={[
                 styles.input,
@@ -293,9 +388,12 @@ export default function EnrollmentScreen() {
               ]}
               value={yearLevel}
               onChangeText={(text) => {
-                setYearLevel(text);
-                if (errors.yearLevel) {
-                  setErrors((prev) => ({ ...prev, yearLevel: '' }));
+                // Only allow numbers 1-6
+                if (/^[1-6]?$/.test(text)) {
+                  setYearLevel(text);
+                  if (errors.yearLevel) {
+                    setErrors((prev) => ({ ...prev, yearLevel: '' }));
+                  }
                 }
               }}
               placeholder="Enter your year level (1-6)"
@@ -311,10 +409,11 @@ export default function EnrollmentScreen() {
             )}
           </View>
 
+          {/* Course Selection */}
           <View style={styles.formGroup}>
             <Text style={[styles.label, isDark && styles.textDark]}>Course Selection *</Text>
-            <Text style={[styles.warning, isDark && styles.warningDark]}>
-              Course selections are final and cannot be modified after submission
+            <Text style={[styles.helperText, isDark && styles.textLightDark]}>
+              Select all courses you want to enroll in. You can select multiple courses.
             </Text>
             <View style={styles.courseList}>
               {courses.map((course) => (
@@ -335,25 +434,39 @@ export default function EnrollmentScreen() {
                       setErrors((prev) => ({ ...prev, courses: '' }));
                     }
                   }}
+                  disabled={isSubmitting}
                 >
-                  <Text
+                  <View style={styles.courseInfo}>
+                    <Text
+                      style={[
+                        styles.courseTitle,
+                        isDark && styles.textDark,
+                        selectedCourses.includes(course.id) && styles.courseTextSelected,
+                      ]}
+                    >
+                      {course.title}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.courseCode,
+                        isDark && styles.textLightDark,
+                        selectedCourses.includes(course.id) && styles.courseTextSelected,
+                      ]}
+                    >
+                      {course.code}
+                    </Text>
+                  </View>
+                  <View
                     style={[
-                      styles.courseTitle,
-                      isDark && styles.textDark,
-                      selectedCourses.includes(course.id) && styles.courseTextSelected,
+                      styles.checkbox,
+                      isDark && styles.checkboxDark,
+                      selectedCourses.includes(course.id) && styles.checkboxSelected,
                     ]}
                   >
-                    {course.title}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.courseCode,
-                      isDark && styles.textLightDark,
-                      selectedCourses.includes(course.id) && styles.courseTextSelected,
-                    ]}
-                  >
-                    {course.code}
-                  </Text>
+                    {selectedCourses.includes(course.id) && (
+                      <Text style={styles.checkmark}>✓</Text>
+                    )}
+                  </View>
                 </TouchableOpacity>
               ))}
             </View>
@@ -366,12 +479,25 @@ export default function EnrollmentScreen() {
           </View>
         </View>
 
+        {/* Submit Button */}
         <TouchableOpacity
-          style={[styles.submitButton, isDark && styles.submitButtonDark]}
+          style={[
+            styles.submitButton,
+            isDark && styles.submitButtonDark,
+            isSubmitting && styles.submitButtonDisabled,
+          ]}
           onPress={handleSubmit}
+          disabled={isSubmitting}
         >
-          <Text style={styles.submitButtonText}>Complete Enrollment</Text>
+          <Text style={styles.submitButtonText}>
+            {isSubmitting ? 'Submitting...' : 'Complete Enrollment'}
+          </Text>
         </TouchableOpacity>
+
+        <Text style={[styles.finalWarning, isDark && styles.finalWarningDark]}>
+          By clicking "Complete Enrollment", you confirm that all information is correct and 
+          understand that these selections cannot be changed.
+        </Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -389,25 +515,75 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#666666',
+  },
   header: {
-    marginBottom: 32,
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  lockIconContainer: {
+    marginBottom: 16,
+    padding: 16,
+    backgroundColor: '#FFE5E5',
+    borderRadius: 50,
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
     color: '#333333',
     marginBottom: 8,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
     color: '#666666',
     lineHeight: 24,
+    textAlign: 'center',
+    paddingHorizontal: 20,
   },
   textDark: {
     color: '#FFFFFF',
   },
   textLightDark: {
     color: '#BBBBBB',
+  },
+  warningCard: {
+    backgroundColor: '#FFF5F5',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 2,
+    borderColor: '#FFE5E5',
+  },
+  warningCardDark: {
+    backgroundColor: '#2A1A1A',
+    borderColor: '#3A2A2A',
+  },
+  warningHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  warningTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FF6B6B',
+    marginLeft: 8,
+  },
+  warningText: {
+    fontSize: 14,
+    color: '#CC5555',
+    lineHeight: 20,
+  },
+  warningTextDark: {
+    color: '#FF8888',
   },
   form: {
     gap: 24,
@@ -419,6 +595,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#333333',
+  },
+  helperText: {
+    fontSize: 14,
+    color: '#666666',
+    marginBottom: 8,
   },
   input: {
     backgroundColor: '#FFFFFF',
@@ -465,6 +646,7 @@ const styles = StyleSheet.create({
   dropdownText: {
     fontSize: 16,
     color: '#333333',
+    flex: 1,
   },
   placeholder: {
     color: '#999999',
@@ -480,6 +662,9 @@ const styles = StyleSheet.create({
   dropdownListDark: {
     backgroundColor: '#2A2A2A',
     borderColor: '#3A3A3A',
+  },
+  dropdownScrollView: {
+    maxHeight: 180,
   },
   dropdownItem: {
     padding: 16,
@@ -500,19 +685,6 @@ const styles = StyleSheet.create({
     color: '#4361EE',
     fontWeight: '600',
   },
-  warning: {
-    backgroundColor: '#FFF3CD',
-    color: '#856404',
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 8,
-    marginBottom: 16,
-    fontSize: 14,
-  },
-  warningDark: {
-    backgroundColor: '#483C14',
-    color: '#FFB74D',
-  },
   courseList: {
     gap: 12,
   },
@@ -522,6 +694,9 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderColor: '#EEEEEE',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   courseItemDark: {
     backgroundColor: '#2A2A2A',
@@ -530,6 +705,9 @@ const styles = StyleSheet.create({
   courseItemSelected: {
     backgroundColor: '#E7ECFF',
     borderColor: '#4361EE',
+  },
+  courseInfo: {
+    flex: 1,
   },
   courseTitle: {
     fontSize: 16,
@@ -544,26 +722,56 @@ const styles = StyleSheet.create({
   courseTextSelected: {
     color: '#4361EE',
   },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#DDDDDD',
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxDark: {
+    borderColor: '#555555',
+    backgroundColor: '#2A2A2A',
+  },
+  checkboxSelected: {
+    backgroundColor: '#4361EE',
+    borderColor: '#4361EE',
+  },
+  checkmark: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
   submitButton: {
     backgroundColor: '#4361EE',
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
     marginTop: 32,
-    marginBottom: 20,
   },
   submitButtonDark: {
     backgroundColor: '#4361EE',
+  },
+  submitButtonDisabled: {
+    backgroundColor: '#CCCCCC',
   },
   submitButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },
-  loadingText: {
-    fontSize: 16,
-    color: '#666666',
+  finalWarning: {
+    fontSize: 12,
+    color: '#999999',
     textAlign: 'center',
-    marginTop: 20,
+    marginTop: 16,
+    marginBottom: 20,
+    lineHeight: 18,
+  },
+  finalWarningDark: {
+    color: '#777777',
   },
 });

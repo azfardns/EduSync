@@ -2,69 +2,113 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from './useSupabase';
 import type { Database } from '@/types/database';
 
-type AcademicProgram = Database['public']['Tables']['academic_programs']['Row'];
-type Department = Database['public']['Tables']['departments']['Row'];
+type Faculty = Database['public']['Tables']['faculties']['Row'];
+type Program = Database['public']['Tables']['programs']['Row'] & {
+  faculty: Faculty;
+};
+type Course = Database['public']['Tables']['courses']['Row'];
 
-type AcademicDataContextType = {
-  academicPrograms: AcademicProgram[];
-  departments: Department[];
+type EnrollmentDataContextType = {
+  faculties: Faculty[];
+  programs: Program[];
+  courses: Course[];
   isLoading: boolean;
   error: string | null;
+  getProgramsByFaculty: (facultyId: string) => Program[];
+  getCoursesByProgram: (programId: string) => Course[];
+  refreshData: () => Promise<void>;
 };
 
-const AcademicDataContext = createContext<AcademicDataContextType | undefined>(undefined);
+const EnrollmentDataContext = createContext<EnrollmentDataContextType | undefined>(undefined);
 
-export function AcademicDataProvider({ children }: { children: React.ReactNode }) {
-  const [academicPrograms, setAcademicPrograms] = useState<AcademicProgram[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
+export function EnrollmentDataProvider({ children }: { children: React.ReactNode }) {
+  const [faculties, setFaculties] = useState<Faculty[]>([]);
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchAcademicData() {
-      try {
-        setIsLoading(true);
-        setError(null);
+  const fetchEnrollmentData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-        const [programsResponse, departmentsResponse] = await Promise.all([
-          supabase.from('academic_programs').select('*').order('name'),
-          supabase.from('departments').select('*').order('name')
-        ]);
+      // Fetch faculties
+      const { data: facultiesData, error: facultiesError } = await supabase
+        .from('faculties')
+        .select('*')
+        .order('name');
 
-        if (programsResponse.error) throw programsResponse.error;
-        if (departmentsResponse.error) throw departmentsResponse.error;
+      if (facultiesError) throw facultiesError;
 
-        setAcademicPrograms(programsResponse.data);
-        setDepartments(departmentsResponse.data);
-      } catch (err: any) {
-        setError(err.message);
-        console.error('Error fetching academic data:', err);
-      } finally {
-        setIsLoading(false);
-      }
+      // Fetch programs with faculty information
+      const { data: programsData, error: programsError } = await supabase
+        .from('programs')
+        .select(`
+          *,
+          faculty:faculties(*)
+        `)
+        .order('name');
+
+      if (programsError) throw programsError;
+
+      // Fetch courses with program information
+      const { data: coursesData, error: coursesError } = await supabase
+        .from('courses')
+        .select('*')
+        .order('title');
+
+      if (coursesError) throw coursesError;
+
+      setFaculties(facultiesData || []);
+      setPrograms(programsData || []);
+      setCourses(coursesData || []);
+    } catch (err: any) {
+      setError(err.message);
+      console.error('Error fetching enrollment data:', err);
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    fetchAcademicData();
+  useEffect(() => {
+    fetchEnrollmentData();
   }, []);
 
+  const getProgramsByFaculty = (facultyId: string): Program[] => {
+    return programs.filter(program => program.faculty_id === facultyId);
+  };
+
+  const getCoursesByProgram = (programId: string): Course[] => {
+    return courses.filter(course => course.program_id === programId);
+  };
+
+  const refreshData = async () => {
+    await fetchEnrollmentData();
+  };
+
   return (
-    <AcademicDataContext.Provider
+    <EnrollmentDataContext.Provider
       value={{
-        academicPrograms,
-        departments,
+        faculties,
+        programs,
+        courses,
         isLoading,
-        error
+        error,
+        getProgramsByFaculty,
+        getCoursesByProgram,
+        refreshData
       }}
     >
       {children}
-    </AcademicDataContext.Provider>
+    </EnrollmentDataContext.Provider>
   );
 }
 
-export function useAcademicData() {
-  const context = useContext(AcademicDataContext);
+export function useEnrollmentData() {
+  const context = useContext(EnrollmentDataContext);
   if (!context) {
-    throw new Error('useAcademicData must be used within an AcademicDataProvider');
+    throw new Error('useEnrollmentData must be used within an EnrollmentDataProvider');
   }
   return context;
 }

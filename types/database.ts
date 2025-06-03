@@ -15,13 +15,12 @@ export interface Database {
           email: string
           name: string
           role: 'student' | 'instructor' | 'admin'
-          first_name: string | null
-          middle_name: string | null
-          last_name: string | null
-          academic_program_id: string | null
-          department_id: string | null
-          year_level: number | null
+          full_name: string | null
+          faculty_id: string | null
+          program_id: string | null
+          year_of_study: number | null
           enrollment_completed: boolean
+          enrollment_locked: boolean
           created_at: string
           updated_at: string
         }
@@ -30,13 +29,12 @@ export interface Database {
           email: string
           name: string
           role: 'student' | 'instructor' | 'admin'
-          first_name?: string | null
-          middle_name?: string | null
-          last_name?: string | null
-          academic_program_id?: string | null
-          department_id?: string | null
-          year_level?: number | null
+          full_name?: string | null
+          faculty_id?: string | null
+          program_id?: string | null
+          year_of_study?: number | null
           enrollment_completed?: boolean
+          enrollment_locked?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -45,18 +43,17 @@ export interface Database {
           email?: string
           name?: string
           role?: 'student' | 'instructor' | 'admin'
-          first_name?: string | null
-          middle_name?: string | null
-          last_name?: string | null
-          academic_program_id?: string | null
-          department_id?: string | null
-          year_level?: number | null
+          full_name?: string | null
+          faculty_id?: string | null
+          program_id?: string | null
+          year_of_study?: number | null
           enrollment_completed?: boolean
+          enrollment_locked?: boolean
           created_at?: string
           updated_at?: string
         }
       }
-      academic_programs: {
+      faculties: {
         Row: {
           id: string
           name: string
@@ -73,20 +70,23 @@ export interface Database {
           created_at?: string
         }
       }
-      departments: {
+      programs: {
         Row: {
           id: string
           name: string
+          faculty_id: string
           created_at: string
         }
         Insert: {
           id?: string
           name: string
+          faculty_id: string
           created_at?: string
         }
         Update: {
           id?: string
           name?: string
+          faculty_id?: string
           created_at?: string
         }
       }
@@ -95,6 +95,7 @@ export interface Database {
           id: string
           code: string
           title: string
+          program_id: string | null
           instructor_id: string
           created_at: string
           updated_at: string
@@ -103,6 +104,7 @@ export interface Database {
           id?: string
           code: string
           title: string
+          program_id?: string | null
           instructor_id: string
           created_at?: string
           updated_at?: string
@@ -111,9 +113,30 @@ export interface Database {
           id?: string
           code?: string
           title?: string
+          program_id?: string | null
           instructor_id?: string
           created_at?: string
           updated_at?: string
+        }
+      }
+      student_courses: {
+        Row: {
+          id: string
+          student_id: string
+          course_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          student_id: string
+          course_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          student_id?: string
+          course_id?: string
+          created_at?: string
         }
       }
       enrollments: {
